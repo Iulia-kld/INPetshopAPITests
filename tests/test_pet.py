@@ -60,7 +60,7 @@ class TestPet:
             assert response.status_code == 200, "Code status is not as expected"
             jsonschema.validate(response_json, PET_SCHEMA)
 
-        with allure.step("Проверить статус ответа"):
+        with allure.step("Проверить поля создания питомца"):
             assert response_json['id'] == payload['id'], "ID питомца не совпадает с ожидаемым"
             assert response_json['name'] == payload['name'], "Name питомца не совпадает с ожидаемым"
             assert response_json['status'] == payload['status'], "Status питомца не совпадает с ожидаемым"
@@ -90,7 +90,7 @@ class TestPet:
             assert response.status_code == 200, "Code status is not as expected"
             jsonschema.validate(response_json, PET_SCHEMA)
 
-        with allure.step("Проверить статус ответа"):
+        with allure.step("Проверить поля создания питомца"):
              assert response_json['id'] == payload['id'], "ID питомца не совпадает с ожидаемым"
              assert response_json['name'] == payload['name'], "Name питомца не совпадает с ожидаемым"
              assert response_json['status'] == payload['status'], "Status питомца не совпадает с ожидаемым"
