@@ -2,6 +2,7 @@ from http.client import responses
 
 import allure
 import jsonschema
+import pytest
 import requests
 
 from .schemas.pet_schema import PET_SCHEMA
@@ -111,7 +112,7 @@ class TestPet:
              assert  response.status_code == 200, "Code status is not as expected"
              assert  response.json()["id"] == pet_id
 
-    allure.title("Обновление информации о питомце")
+    @allure.title("Обновление информации о питомце")
     def test_update_info_about_pet(self, create_pet):
 
         with allure.step("Получение id питомца"):
@@ -132,7 +133,7 @@ class TestPet:
             assert response.json()["name"] == payload_update["name"]
             assert response.json()["status"] == payload_update["status"]
 
-    allure.title("Удаление информации о питомце")
+    @allure.title("Удаление информации о питомце")
     def test_delete_pet(self, create_pet):
 
         with allure.step("Получение id питомца"):
@@ -149,3 +150,23 @@ class TestPet:
 
         with allure.step("Проверка статуса ответа"):
             assert response.status_code == 404, "Code status is not as expected"
+
+    @allure.title("Получение списка питомцев по статусу")
+    @pytest.mark.parametrize(
+        "status, expected_status_code, expected_type",
+        [
+            ("available", 200, list),
+            ("pending", 200, list),
+            ("sold", 200, list),
+            ("@@@@@!!!!_____", 400, dict),
+            ("", 400, dict),
+
+        ]
+    )
+    def test_get_pets_by_status(self, status, expected_status_code, expected_type):
+        with allure.step(f"Отправка запроса на получение питомцев по статусу {status}"):
+            response = requests.get(f"{BASE_URL}/pet/findByStatus", params={"status":status})
+
+        with allure.step("Проверка статуса ответа и формата данных"):
+            assert response.status_code == expected_status_code, "Code status is not as expected"
+            assert isinstance(response.json(), expected_type), "The data format does not match the expected format."
