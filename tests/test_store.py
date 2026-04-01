@@ -5,7 +5,7 @@ import requests
 import pytest
 import allure
 import jsonschema
-from tests.schemas.pet_schema import STORE_SCHEMA
+from tests.schemas.pet_schema import STORE_SCHEMA, INVENTORY_SCHEMA
 
 BASE_URL = "http://5.181.109.28:9090/api/v3"
 
@@ -32,11 +32,11 @@ class TestStore:
             jsonschema.validate(response_json, STORE_SCHEMA)
 
         with allure.step("Проверить поля отправленного заказа"):
-            assert response_json['id'] == payload['id'], "ID питомца не совпадает с ожидаемым"
-            assert response_json['petId'] == payload['petId'], "PetId питомца не совпадает с ожидаемым"
-            assert response_json['quantity'] == payload['quantity'], "Quantity питомца не совпадает с ожидаемым"
-            assert response_json['status'] == payload['status'], "Status питомца не совпадает с ожидаемым"
-            assert response_json['complete'] == payload['complete'], "Complete питомца не совпадает с ожидаемым"
+            assert response_json['id'] == payload['id'], "ID заказа не совпадает с ожидаемым"
+            assert response_json['petId'] == payload['petId'], "PetId заказа не совпадает с ожидаемым"
+            assert response_json['quantity'] == payload['quantity'], "Quantity заказа не совпадает с ожидаемым"
+            assert response_json['status'] == payload['status'], "Status заказа не совпадает с ожидаемым"
+            assert response_json['complete'] == payload['complete'], "Complete заказа не совпадает с ожидаемым"
 
     @allure.title("Получение информации о заказе по ID")
     def test_get_info_about_order(self, create_order):
@@ -76,14 +76,23 @@ class TestStore:
 
     @allure.title("Получение инвентаря магазина")
     def test_get_store_inventory_data(self):
-        with allure.step("Отпрвка запроса на получение инвентаря"):
-            response = requests.get(f"{BASE_URL}/store/inventory")
-            response_json = response.json()
+            with allure.step("Подготовка данных для отправки"):
+                payload = {
+                    "approved": 57,
+                    "delivered": 50
+                }
 
-        with allure.step("Проверка статус кода и данных в ответе"):
-            assert response.status_code == 200, "Code status is not as expected"
-            assert isinstance(response_json, dict), "The answer is not a dictionary"
-            assert "approved" in response_json, "There is no such key"
-            assert "delivered" in response_json, "There is no such key"
-            assert isinstance(response_json["approved"], int), "There is no such value"
-            assert isinstance(response_json["delivered"], int), "There is no such value"
+            with allure.step("Отпрвка запроса на получение инвентаря"):
+                response = requests.get(f"{BASE_URL}/store/inventory",  json=payload)
+                response_json = response.json()
+
+            with allure.step("Проверить статус ответа"):
+                assert response.status_code == 200, "Code status is not as expected"
+                jsonschema.validate(response_json, INVENTORY_SCHEMA)
+
+            with allure.step("Проверка статус кода и данных в ответе"):
+                assert response.status_code == 200, "Code status is not as expected"
+
+            with allure.step("Проверка полученных полей"):
+                 assert response_json['approved'] == payload['approved'], "Approved не совпадает с ожидаемым"
+                 assert response_json['delivered'] == payload['delivered'], "Delivered не совпадает с ожидаемым"
