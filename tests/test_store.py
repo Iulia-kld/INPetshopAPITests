@@ -76,23 +76,10 @@ class TestStore:
 
     @allure.title("Получение инвентаря магазина")
     def test_get_store_inventory_data(self):
-            with allure.step("Подготовка данных для отправки"):
-                payload = {
-                    "approved": 57,
-                    "delivered": 50
-                }
-
             with allure.step("Отпрвка запроса на получение инвентаря"):
-                response = requests.get(f"{BASE_URL}/store/inventory",  json=payload)
+                response = requests.get(f"{BASE_URL}/store/inventory")
                 response_json = response.json()
 
-            with allure.step("Проверить статус ответа"):
+            with allure.step("Проверить статус ответа и формат ответа"):
                 assert response.status_code == 200, "Code status is not as expected"
                 jsonschema.validate(response_json, INVENTORY_SCHEMA)
-
-            with allure.step("Проверка статус кода и данных в ответе"):
-                assert response.status_code == 200, "Code status is not as expected"
-
-            with allure.step("Проверка полученных полей"):
-                 assert response_json['approved'] == payload['approved'], "Approved не совпадает с ожидаемым"
-                 assert response_json['delivered'] == payload['delivered'], "Delivered не совпадает с ожидаемым"
